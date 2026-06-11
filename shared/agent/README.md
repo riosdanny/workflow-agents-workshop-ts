@@ -18,7 +18,7 @@ prepareDiff → filterDiff → [ security ‖ performance ‖ ux? ] → judge
 - The agents: `securityReviewer`, `performanceReviewer`, `uxReviewer`, `judge`,
   plus `REVIEWERS`, `selectReviewers()`, and `hasFrontendFiles()`.
 - `prepareDiff(pr)` — GitHub PR URL → per-file patches (public repos, no auth).
-- `filterDiff(patches, { breakGlass })` — drop noise files before review.
+- `filterDiff(patches)` — drop noise files before review.
 - `parseDecision(text)` — judge output → `{ verdict, reason, findings }`.
 - `resolveClient` / `resolveModelSpec` / `MODEL_TIERS` — provider-agnostic model
   client over `fetch` (Anthropic + OpenAI), with a deterministic **mock** client
@@ -37,7 +37,8 @@ src/
   model.ts         Anthropic/OpenAI adapters + MockClient
   model-tiers.ts   small/medium/large → concrete models
   prepareDiff.ts   GitHub PR → Patch[]
-  filterDiff.ts    noise filtering + break-glass
+  filterDiff.ts    noise filtering
+  helpers.ts       shared utilities (review, patch, model tier)
   tool.ts / tool-registry.ts   tool helpers + auto-discovered registry
   tools/             one file per tool (auto-discovered by loader.ts)
   types.ts         shared contracts

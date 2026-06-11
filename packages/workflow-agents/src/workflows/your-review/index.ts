@@ -12,33 +12,10 @@
  * docs/04-author-a-task.md for ideas and a worked example.
  */
 import { task } from "@renderinc/sdk/workflows";
-import { filterDiff, prepareDiff, type Patch } from "@workshop/agent";
+import { extensions, filterDiff, overview, prepareDiff } from "@workshop/agent";
 
 interface YourReviewInput {
   url: string;
-  /** Break-glass: include lock files and other noise in the diff. */
-  breakGlass?: boolean;
-}
-
-function overview(patches: Patch[]) {
-  const totalDiffLines = patches.reduce((n, p) => n + p.diff.split("\n").length, 0);
-  return {
-    fileCount: patches.length,
-    totalDiffLines,
-    largestFiles: [...patches]
-      .sort((a, b) => b.diff.length - a.diff.length)
-      .slice(0, 5)
-      .map((p) => ({ file: p.file, diffLines: p.diff.split("\n").length })),
-  };
-}
-
-function extensions(patches: Patch[]) {
-  const counts = new Map<string, number>();
-  for (const { file } of patches) {
-    const ext = file.includes(".") ? (file.split(".").pop() ?? "(none)") : "(none)";
-    counts.set(ext, (counts.get(ext) ?? 0) + 1);
-  }
-  return Object.fromEntries([...counts.entries()].sort((a, b) => b[1] - a[1]));
 }
 
 export default task(
@@ -49,7 +26,7 @@ export default task(
   },
   async function yourReview(input: YourReviewInput) {
     const allPatches = await prepareDiff({ url: input.url, labels: [] });
-    const filtered = filterDiff(allPatches, input.breakGlass ? { breakGlass: true } : {});
+    const filtered = filterDiff(allPatches);
 
     // Everything below is a starting point — replace, extend, or delete freely.
     return {
@@ -57,7 +34,6 @@ export default task(
       overview: overview(filtered.patches),
       extensions: extensions(filtered.patches),
       dropped: filtered.dropped,
-      breakGlass: filtered.breakGlass,
     };
   },
 );

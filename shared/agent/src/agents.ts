@@ -8,9 +8,12 @@
  *   workflow-agents → task(agent.name, ({ input }) => agent.run(input))
  */
 import { defineAgent } from './agent.js'
+import { hasFrontendFiles } from './helpers.js'
 import { resolveModelSpec } from './model-tiers.js'
 import type { Patch } from './prepareDiff.js'
 import type { Agent } from './types.js'
+
+export { hasFrontendFiles } from './helpers.js'
 
 const FINDING_FORMAT = `## Output format
 
@@ -98,18 +101,6 @@ from the findings you are given. Respond with JSON only, no prose around it.`,
 
 /** The reviewers that always run, fanned out in parallel. */
 export const REVIEWERS: Agent[] = [securityReviewer, performanceReviewer]
-
-/** File extensions that signal a frontend change and warrant the UX reviewer. */
-const FRONTEND_EXTENSIONS = /\.(tsx|jsx|vue|svelte|css|scss|less|html)$/
-
-/**
- * Does this diff touch frontend files? Used to conditionally branch the UX
- * reviewer into the fan-out — security and performance always run; UX only runs
- * when there's UI to review.
- */
-export function hasFrontendFiles(patches: Patch[]): boolean {
-  return patches.some((p) => FRONTEND_EXTENSIONS.test(p.file))
-}
 
 /**
  * The reviewers to run for a given diff: the always-on specialists plus the UX

@@ -141,18 +141,50 @@ URL, and watch the review run with per-agent findings and spans.
 
 ## Repository structure
 
+Start with the pattern you care about, then follow the shared core the patterns
+all import.
+
 ```
 packages/
-  naive-agent/      Pattern 1: in-process web service (Hono)
-  worker-agents/    Pattern 2: producer web + background worker over Valkey
-  workflow-agents/  Pattern 3: Render Workflows gateway + workflow service
+  naive-agent/              Pattern 1: in-process web service (Hono)
+                              → src/server.ts         POST /api/reviews; awaits runReview()
+                              → render.yaml             single-service Blueprint
+
+  worker-agents/            Pattern 2: producer web + background worker (Valkey)
+                              → src/web.ts              enqueue jobs, stream SSE progress
+                              → src/worker.ts           consume the queue, run runReview()
+                              → src/kv.ts               Valkey stream + pub/sub wiring
+
+  workflow-agents/          Pattern 3: Render Workflows gateway + workflow service
+                              → src/server.ts           dispatch workflows, GitHub webhooks
+                              → src/workflows/code-review/index.ts   the finished pipeline as tasks
+                              → src/workflows/your-review/index.ts   sandbox for the hands-on finale
+
 shared/
-  agent/            @workshop/agent: LLM loop, model client, agents, runReview
-  db/               @workshop/db: telemetry store (Postgres or in-memory)
-  ui/               @workshop/ui: mountable Hono telemetry viewer
-docs/               guided walkthrough (00-05)
-facilitator/        facilitator notes and exercise solutions
-tests/              unit, integration, and e2e tests against the mock model
+  agent/                    @workshop/agent — LLM loop, agents, runReview (substrate-agnostic)
+                              → src/review.ts           runReview() orchestration
+                              → src/agents.ts           security, performance, ux, judge definitions
+                              → src/loop.ts             provider-agnostic LLM + tool loop
+
+  db/                       @workshop/db — telemetry store (Postgres or in-memory)
+                              → src/index.ts            createReview, persistReview, storeTracer
+                              → src/memory.ts           in-memory backend for local dev
+
+  ui/                       @workshop/ui — mountable Hono telemetry viewer
+                              → src/index.ts            createUiRouter() + read APIs
+                              → src/page.ts             dashboard HTML template
+
+docs/                       guided walkthrough (00–05)
+                              → 00-setup.md             fork, Render, local dev
+                              → 01-naive-agent.md       Pattern 1 walkthrough
+                              → 04-author-a-task.md     ship your own workflow task
+
+facilitator/                facilitator notes and exercise solutions
+
+tests/                      unit, integration, and e2e tests (mock model, no API key)
+                              → integration/run-review.test.ts      core pipeline end-to-end
+                              → integration/workflow-dispatch.test.ts   Pattern 3 dispatch path
+                              → helpers.ts                          GitHub stub + shared fixtures
 ```
 
 ### Shared packages

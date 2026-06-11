@@ -3,6 +3,7 @@
  * without authentication; a GITHUB_TOKEN raises rate limits and unlocks private
  * repos.
  */
+import { parsePrUrl } from './helpers.js'
 
 export interface PullRequest {
   url: string
@@ -12,18 +13,6 @@ export interface PullRequest {
 export interface Patch {
   file: string
   diff: string
-}
-
-const PR_URL_RE = /github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/
-
-function parsePrUrl(url: string): { owner: string; repo: string; number: number } {
-  const match = PR_URL_RE.exec(url)
-  if (!match) {
-    throw new Error(
-      `cannot parse PR URL: "${url}" (expected https://github.com/{owner}/{repo}/pull/{number})`,
-    )
-  }
-  return { owner: match[1]!, repo: match[2]!, number: Number(match[3]) }
 }
 
 interface GitHubFile {
@@ -50,8 +39,7 @@ export async function prepareDiff(input: PullRequest): Promise<Patch[]> {
   }
 
   const files = (await res.json()) as GitHubFile[]
-  // Return every changed file that has a patch. Noise filtering is a separate,
-  // explicit pipeline step (see filterDiff) so the "break-glass" override is
-  // visible rather than buried in fetch logic.
+  // Return every changed file that has a patch. Noise filtering is a separate
+  // pipeline step (see filterDiff).
   return files.filter((f) => f.patch).map((f) => ({ file: f.filename, diff: f.patch! }))
 }

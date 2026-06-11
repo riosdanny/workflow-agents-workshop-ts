@@ -18,6 +18,15 @@ export type {
   RunReviewOptions,
 } from './review.js'
 
+export {
+  overview,
+  extensions,
+  hasFrontendFiles,
+  isNoise,
+  parsePrUrl,
+  extractJson,
+} from './helpers.js'
+
 export { defineAgent } from './agent.js'
 export {
   REVIEWERS,
@@ -26,7 +35,6 @@ export {
   performanceReviewer,
   uxReviewer,
   judge,
-  hasFrontendFiles,
   selectReviewers,
 } from './agents.js'
 
@@ -34,7 +42,7 @@ export { prepareDiff } from './prepareDiff.js'
 export type { Patch, PullRequest } from './prepareDiff.js'
 
 export { filterDiff } from './filterDiff.js'
-export type { FilterDiffOptions, FilterDiffResult } from './filterDiff.js'
+export type { FilterDiffResult } from './filterDiff.js'
 
 // Tools + MCP: drop a file in src/tools/ (auto-discovered) or registerTool().
 export { defineTool, defineMcpSource } from './tools/tool.js'

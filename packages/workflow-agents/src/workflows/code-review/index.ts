@@ -53,7 +53,6 @@ const judgeTask = task(
 interface CodeReviewInput {
   url: string;
   labels?: string[];
-  breakGlass?: boolean;
   _runId?: string;
 }
 
@@ -67,8 +66,7 @@ export default task(
     const runId = input._runId;
 
     const allPatches = await prepareDiff({ url: input.url, labels: input.labels ?? [] });
-    const breakGlass = input.breakGlass || (input.labels ?? []).includes("break-glass");
-    const { patches } = filterDiff(allPatches, breakGlass ? { breakGlass } : {});
+    const { patches } = filterDiff(allPatches);
 
     // Conditional fan-out: security + performance always; UX only for frontend.
     const reviewerTasks = [

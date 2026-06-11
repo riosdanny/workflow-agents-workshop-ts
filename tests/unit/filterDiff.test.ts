@@ -16,14 +16,6 @@ test('filterDiff drops noise files by default', () => {
     ['src/index.ts', 'styles.css'],
   )
   assert.deepEqual(result.dropped.sort(), ['dist/app.min.js', 'package-lock.json'])
-  assert.equal(result.breakGlass, false)
-})
-
-test('filterDiff break-glass keeps everything', () => {
-  const result = filterDiff(patches, { breakGlass: true })
-  assert.equal(result.patches.length, 4)
-  assert.deepEqual(result.dropped, [])
-  assert.equal(result.breakGlass, true)
 })
 
 test('filterDiff on a clean diff drops nothing', () => {
