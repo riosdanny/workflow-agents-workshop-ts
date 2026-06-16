@@ -2,7 +2,6 @@
 # Builds from the repo root so the npm workspaces resolve.
 
 ungrouped:
-  - name: riosdanny-agents-workshop-naive
     # environments:
     #   - name: production
     databases:
